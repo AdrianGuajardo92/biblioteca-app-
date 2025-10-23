@@ -856,7 +856,10 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
         🏠
       </button>
 
-      <button className="search-toggle-btn" onClick={() => setSearchPanelOpen(!searchPanelOpen)} title="Lista de Búsqueda">
+      <button className="search-toggle-btn" onClick={() => {
+        setSearchPanelOpen(!searchPanelOpen);
+        setImportPanelOpen(false);
+      }} title="Lista de Búsqueda">
         🔍
         {enlacesPendientes.length > 0 && (
           <span className="badge">{enlacesPendientes.length}</span>
@@ -867,7 +870,10 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
         📋
       </button>
 
-      <button className="import-toggle-btn" onClick={() => setImportPanelOpen(!importPanelOpen)} title="Importar Libros desde JSON">
+      <button className="import-toggle-btn" onClick={() => {
+        setImportPanelOpen(!importPanelOpen);
+        setSearchPanelOpen(false);
+      }} title="Importar Libros desde JSON">
         📥
       </button>
 
