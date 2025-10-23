@@ -30,10 +30,14 @@ interface BibliotecaData {
 }
 
 // Inicializar cliente Redis de Upstash
-// Vercel genera KV_REST_API_URL y KV_REST_API_TOKEN cuando conectas la base de datos
+// Vercel puede generar diferentes nombres de variables dependiendo de la configuración
 const redis = new Redis({
-  url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '',
-  token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '',
+  url: process.env.KV_REST_API_URL ||
+       process.env.UPSTASH_REDIS_REST_KV_REST_API_URL ||
+       process.env.UPSTASH_REDIS_REST_URL || '',
+  token: process.env.KV_REST_API_TOKEN ||
+         process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN ||
+         process.env.UPSTASH_REDIS_REST_TOKEN || '',
 });
 
 // Datos por defecto
