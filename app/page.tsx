@@ -39,24 +39,18 @@ export default function BibliotecaPage() {
 
   // Agregar/quitar clases al body cuando se abren/cierran los paneles
   useEffect(() => {
-    console.log('🔍 useEffect searchPanelOpen ejecutado:', searchPanelOpen);
     if (searchPanelOpen) {
-      console.log('✅ Abriendo panel de búsqueda - agregando clase search-panel-open');
       document.body.classList.add('search-panel-open');
     } else {
-      console.log('❌ Cerrando panel de búsqueda - removiendo clase search-panel-open');
       document.body.classList.remove('search-panel-open');
     }
   }, [searchPanelOpen]);
 
 
   useEffect(() => {
-    console.log('📥 useEffect importPanelOpen ejecutado:', importPanelOpen);
     if (importPanelOpen) {
-      console.log('✅ Abriendo panel de importar - agregando clase import-panel-open');
       document.body.classList.add('import-panel-open');
     } else {
-      console.log('❌ Cerrando panel de importar - removiendo clase import-panel-open');
       document.body.classList.remove('import-panel-open');
     }
   }, [importPanelOpen]);
@@ -856,22 +850,14 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
 
       {/* Botones flotantes */}
       <button className="home-button" onClick={() => {
-        console.log('🏠 Click en Home Button');
-        console.log('   Antes - searchPanelOpen:', searchPanelOpen, 'importPanelOpen:', importPanelOpen);
         setSearchPanelOpen(false);
         setImportPanelOpen(false);
-        console.log('   Después - cerrando ambos paneles');
       }} title="Volver a Biblioteca Principal">
         🏠
       </button>
 
       <button className="search-toggle-btn" onClick={() => {
-        console.log('🔍 Click en Search Button');
-        console.log('   Antes - searchPanelOpen:', searchPanelOpen, 'importPanelOpen:', importPanelOpen);
-        const nuevoValor = !searchPanelOpen;
-        console.log('   Cambiando searchPanelOpen a:', nuevoValor);
-        console.log('   Cerrando importPanelOpen');
-        setSearchPanelOpen(nuevoValor);
+        setSearchPanelOpen(!searchPanelOpen);
         setImportPanelOpen(false);
       }} title="Lista de Búsqueda">
         🔍
@@ -885,12 +871,7 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
       </button>
 
       <button className="import-toggle-btn" onClick={() => {
-        console.log('📥 Click en Import Button');
-        console.log('   Antes - searchPanelOpen:', searchPanelOpen, 'importPanelOpen:', importPanelOpen);
-        const nuevoValor = !importPanelOpen;
-        console.log('   Cambiando importPanelOpen a:', nuevoValor);
-        console.log('   Cerrando searchPanelOpen');
-        setImportPanelOpen(nuevoValor);
+        setImportPanelOpen(!importPanelOpen);
         setSearchPanelOpen(false);
       }} title="Importar Libros desde JSON">
         📥
@@ -903,12 +884,7 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
           <div className="search-panel-title">
             🔍 Lista de Búsqueda
           </div>
-          <button className="search-panel-close" onClick={() => {
-            console.log('✕ Click en cerrar Search Panel');
-            console.log('   Antes - searchPanelOpen:', searchPanelOpen);
-            setSearchPanelOpen(false);
-            console.log('   Después - searchPanelOpen: false');
-          }}>
+          <button className="search-panel-close" onClick={() => setSearchPanelOpen(false)}>
             ✕
           </button>
         </div>
@@ -1098,12 +1074,7 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
           <div className="import-panel-title">
             📥 Importar Libros desde JSON
           </div>
-          <button className="import-panel-close" onClick={() => {
-            console.log('✕ Click en cerrar Import Panel');
-            console.log('   Antes - importPanelOpen:', importPanelOpen);
-            setImportPanelOpen(false);
-            console.log('   Después - importPanelOpen: false');
-          }}>
+          <button className="import-panel-close" onClick={() => setImportPanelOpen(false)}>
             ✕
           </button>
         </div>
