@@ -1,6 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
+import HeroHeader from './components/HeroHeader';
+import SearchBar from './components/SearchBar';
+import StatsCards from './components/StatsCards';
+import Toolbar from './components/Toolbar';
+import BookTable from './components/BookTable';
+import BookCardsGrid from './components/BookCardsGrid';
+import { useBooks } from './hooks/useBooks';
+import { useFilters } from './hooks/useFilters';
+import { filterBooks } from './utils/bookFilters';
+import { calculateBookStats, getUniqueGenres, getUniqueLanguages, getUniqueYears } from './utils/bookStats';
 
 interface Libro {
   titulo: string;
@@ -18,10 +29,33 @@ interface Libro {
 }
 
 export default function BibliotecaPage() {
-  const [libros, setLibros] = useState<Libro[]>([]);
-  const [isbnsNoEncontrados, setIsbnsNoEncontrados] = useState<string[]>([]);
-  const [enlacesPendientes, setEnlacesPendientes] = useState<string[]>([]);
-  const [titulosGrabados, setTitulosGrabados] = useState<string[]>([]);
+  // Hooks personalizados
+  const {
+    libros,
+    setLibros,
+    isbnsNoEncontrados,
+    setIsbnsNoEncontrados,
+    enlacesPendientes,
+    setEnlacesPendientes,
+    titulosGrabados,
+    setTitulosGrabados,
+    cargarDatos,
+    guardarLibros
+  } = useBooks();
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    filtroGenero,
+    setFiltroGenero,
+    filtroIdioma,
+    setFiltroIdioma,
+    filtroAno,
+    setFiltroAno,
+    limpiarFiltros
+  } = useFilters();
+
+  // Estados locales
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   const [importPanelOpen, setImportPanelOpen] = useState(false);
   const [titulosPanelOpen, setTitulosPanelOpen] = useState(false);
@@ -33,11 +67,22 @@ export default function BibliotecaPage() {
   const [importProgress, setImportProgress] = useState(0);
   const [importTotal, setImportTotal] = useState(0);
   const [importCurrent, setImportCurrent] = useState(0);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [vistaActual, setVistaActual] = useState<'tabla' | 'tarjetas'>('tabla');
 
-  // Cargar datos desde API al montar el componente
+  // Agregar clase al body para el sidebar
   useEffect(() => {
-    cargarDatos();
-  }, []);
+    document.body.classList.add('with-sidebar');
+    if (sidebarCollapsed) {
+      document.body.classList.add('sidebar-collapsed');
+    } else {
+      document.body.classList.remove('sidebar-collapsed');
+    }
+    return () => {
+      document.body.classList.remove('with-sidebar');
+      document.body.classList.remove('sidebar-collapsed');
+    };
+  }, [sidebarCollapsed]);
 
   // Agregar/quitar clases al body cuando se abren/cierran los paneles
   useEffect(() => {
@@ -65,37 +110,27 @@ export default function BibliotecaPage() {
     }
   }, [titulosPanelOpen]);
 
-  const cargarDatos = async () => {
-    try {
-      const response = await fetch('/api/libros');
-      const data = await response.json();
-      setLibros(data.libros || []);
-      setIsbnsNoEncontrados(data.isbnsNoEncontrados || []);
-      setEnlacesPendientes(data.enlacesPendientes || []);
-      setTitulosGrabados(data.titulosGrabados || []);
-    } catch (error) {
-      console.error('Error cargando datos:', error);
-      mostrarToast('Error cargando datos');
-    }
-  };
-
-  const guardarLibros = async (nuevosLibros: Libro[]) => {
-    try {
-      await fetch('/api/libros', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ libros: nuevosLibros }),
-      });
-    } catch (error) {
-      console.error('Error guardando libros:', error);
-    }
-  };
-
   const mostrarToast = (mensaje: string) => {
     setToastMessage(mensaje);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
+
+  // Filtrar libros usando función de utilidad
+  const librosFiltrados = filterBooks(libros, {
+    searchQuery,
+    filtroGenero,
+    filtroIdioma,
+    filtroAno
+  });
+
+  // Calcular estadísticas usando función de utilidad
+  const stats = calculateBookStats(libros, librosFiltrados.length);
+
+  // Obtener listas únicas para filtros usando funciones de utilidad
+  const generosUnicos = getUniqueGenres(libros);
+  const idiomasUnicos = getUniqueLanguages(libros);
+  const anosUnicos = getUniqueYears(libros);
 
   const copiarTabla = () => {
     if (libros.length === 0) {
@@ -176,8 +211,12 @@ export default function BibliotecaPage() {
 
     if (confirm('¿Estás seguro de que quieres eliminar todos los libros de la biblioteca?')) {
       setLibros([]);
-      await guardarLibros([]);
-      mostrarToast('Biblioteca limpiada');
+      try {
+        await guardarLibros([]);
+        mostrarToast('Biblioteca limpiada');
+      } catch (error) {
+        mostrarToast('Error al limpiar biblioteca');
+      }
     }
   };
 
@@ -792,16 +831,80 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
 
   return (
     <>
-      <div className="container">
-        <h1>📚 Biblioteca de Libros</h1>
-        <p className="subtitle">Buscador especializado por ISBN</p>
+      <Sidebar
+        onHomeClick={() => {
+          setSearchPanelOpen(false);
+          setImportPanelOpen(false);
+          setTitulosPanelOpen(false);
+        }}
+        onTitulosClick={() => {
+          setTitulosPanelOpen(!titulosPanelOpen);
+          setSearchPanelOpen(false);
+          setImportPanelOpen(false);
+        }}
+        onSearchClick={() => {
+          setSearchPanelOpen(!searchPanelOpen);
+          setImportPanelOpen(false);
+          setTitulosPanelOpen(false);
+        }}
+        onImportClick={() => {
+          setImportPanelOpen(!importPanelOpen);
+          setSearchPanelOpen(false);
+          setTitulosPanelOpen(false);
+        }}
+        onPromptClick={copiarPrompt}
+        onMercadolibreClick={() => {
+          window.open('https://claude.ai/chat/32c40fd5-b0b3-45e0-8f34-3e9d1d22890d', '_blank');
+        }}
+        titulosCount={titulosGrabados.length}
+        searchCount={enlacesPendientes.length}
+        activePanel={
+          searchPanelOpen ? 'search' :
+          importPanelOpen ? 'import' :
+          titulosPanelOpen ? 'titulos' :
+          'home'
+        }
+      />
 
-        <div className="stats">
-          <div className="stat-card">
-            <span className="stat-number">{libros.length}</span>
-            <span className="stat-label">Libros en biblioteca</span>
-          </div>
-        </div>
+      <div className="container">
+        {/* Hero Header */}
+        <HeroHeader totalLibros={stats.totalLibros} />
+
+        {/* Search Bar */}
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+
+        {/* Stats Cards */}
+        <StatsCards
+          totalLibros={stats.totalLibros}
+          totalAutores={stats.totalAutores}
+          totalGeneros={stats.totalGeneros}
+          libroMasReciente={stats.libroMasReciente?.año || null}
+        />
+
+        {/* Toolbar con Filtros y Acciones */}
+        <Toolbar
+          filtroGenero={filtroGenero}
+          filtroIdioma={filtroIdioma}
+          filtroAno={filtroAno}
+          onGeneroChange={setFiltroGenero}
+          onIdiomaChange={setFiltroIdioma}
+          onAnoChange={setFiltroAno}
+          generosDisponibles={generosUnicos}
+          idiomasDisponibles={idiomasUnicos}
+          anosDisponibles={anosUnicos}
+          vistaActual={vistaActual}
+          onVistaChange={setVistaActual}
+          librosFiltrados={stats.librosFiltrados}
+          totalLibros={stats.totalLibros}
+          onCopiarTabla={copiarTabla}
+          onCopiarEnFila={copiarEnFila}
+          onLimpiarBiblioteca={limpiarBiblioteca}
+          searchQuery={searchQuery}
+          onLimpiarFiltros={limpiarFiltros}
+        />
 
         {isbnsNoEncontrados.length > 0 && (
           <div className="not-found-section">
@@ -838,121 +941,18 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
           </div>
         )}
 
-        <div className="controls">
-          <button onClick={copiarTabla} className="btn-success">
-            📋 Copiar Todo para Google Sheets
-          </button>
-          <button onClick={copiarEnFila} className="btn-success">
-            📊 Copiar en Fila para Excel
-          </button>
-          <button onClick={limpiarBiblioteca} className="btn-danger">
-            🗑️ Limpiar Biblioteca
-          </button>
-        </div>
-
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Sinopsis</th>
-                <th>Título del libro</th>
-                <th>Autor</th>
-                <th>Idioma</th>
-                <th>Editorial del libro</th>
-                <th>Tapa del libro</th>
-                <th>Año de publicación</th>
-                <th>Cantidad de páginas</th>
-                <th>Género del libro</th>
-                <th>ISBN</th>
-                <th>Precio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {libros.length === 0 ? (
-                <tr>
-                  <td colSpan={12} className="empty-state">
-                    <div className="empty-state-icon">📖</div>
-                    <p style={{ fontSize: '1.2em', marginBottom: '10px' }}>No hay libros en la biblioteca</p>
-                    <p>Los libros que busques se añadirán automáticamente aquí</p>
-                  </td>
-                </tr>
-              ) : (
-                libros.map((libro, i) => (
-                  <tr key={i}>
-                    <td>{libro.titulo || ''}</td>
-                    <td><div className="sinopsis">{libro.sinopsis || ''}</div></td>
-                    <td>{libro.tituloCompleto || ''}</td>
-                    <td>{libro.autor || ''}</td>
-                    <td>{libro.idioma || ''}</td>
-                    <td>{libro.editorial || ''}</td>
-                    <td>{libro.tapa || ''}</td>
-                    <td>{libro.año || ''}</td>
-                    <td>{libro.paginas || ''}</td>
-                    <td>{libro.genero || ''}</td>
-                    <td>{libro.isbn || ''}</td>
-                    <td>{libro.precio || ''}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* Vista condicional: Tabla o Tarjetas */}
+        {vistaActual === 'tabla' ? (
+          <BookTable libros={libros} librosFiltrados={librosFiltrados} />
+        ) : (
+          <BookCardsGrid libros={libros} librosFiltrados={librosFiltrados} />
+        )}
       </div>
 
       {/* Toast notification */}
       <div className={`toast ${showToast ? 'show' : ''}`}>
         {toastMessage}
       </div>
-
-      {/* Botones flotantes */}
-      <button className="home-button" onClick={() => {
-        setSearchPanelOpen(false);
-        setImportPanelOpen(false);
-        setTitulosPanelOpen(false);
-      }} title="Volver a Biblioteca Principal">
-        🏠
-      </button>
-
-      <button className="titulos-toggle-btn" onClick={() => {
-        setTitulosPanelOpen(!titulosPanelOpen);
-        setSearchPanelOpen(false);
-        setImportPanelOpen(false);
-      }} title="Títulos Grabados">
-        📝
-        {titulosGrabados.length > 0 && (
-          <span className="badge">{titulosGrabados.length}</span>
-        )}
-      </button>
-
-      <button className="search-toggle-btn" onClick={() => {
-        setSearchPanelOpen(!searchPanelOpen);
-        setImportPanelOpen(false);
-        setTitulosPanelOpen(false);
-      }} title="Lista de Búsqueda">
-        🔍
-        {enlacesPendientes.length > 0 && (
-          <span className="badge">{enlacesPendientes.length}</span>
-        )}
-      </button>
-
-      <button className="prompt-button" onClick={copiarPrompt} title="Copiar Prompt de Búsqueda">
-        📋
-      </button>
-
-      <button className="import-toggle-btn" onClick={() => {
-        setImportPanelOpen(!importPanelOpen);
-        setSearchPanelOpen(false);
-        setTitulosPanelOpen(false);
-      }} title="Importar Libros desde JSON">
-        📥
-      </button>
-
-      <button className="mercadolibre-button" onClick={() => {
-        window.open('https://claude.ai/chat/32c40fd5-b0b3-45e0-8f34-3e9d1d22890d', '_blank');
-      }} title="Títulos para Mercadolibre">
-        🏷️
-      </button>
 
       {/* Vista de pantalla completa de Lista de Búsqueda */}
       <div className={`search-panel-overlay ${searchPanelOpen ? 'active' : ''}`}></div>
