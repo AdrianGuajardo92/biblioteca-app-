@@ -21,8 +21,10 @@ export default function BibliotecaPage() {
   const [libros, setLibros] = useState<Libro[]>([]);
   const [isbnsNoEncontrados, setIsbnsNoEncontrados] = useState<string[]>([]);
   const [enlacesPendientes, setEnlacesPendientes] = useState<string[]>([]);
+  const [titulosGrabados, setTitulosGrabados] = useState<string[]>([]);
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   const [importPanelOpen, setImportPanelOpen] = useState(false);
+  const [titulosPanelOpen, setTitulosPanelOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
@@ -55,6 +57,14 @@ export default function BibliotecaPage() {
     }
   }, [importPanelOpen]);
 
+  useEffect(() => {
+    if (titulosPanelOpen) {
+      document.body.classList.add('titulos-panel-open');
+    } else {
+      document.body.classList.remove('titulos-panel-open');
+    }
+  }, [titulosPanelOpen]);
+
   const cargarDatos = async () => {
     try {
       const response = await fetch('/api/libros');
@@ -62,6 +72,7 @@ export default function BibliotecaPage() {
       setLibros(data.libros || []);
       setIsbnsNoEncontrados(data.isbnsNoEncontrados || []);
       setEnlacesPendientes(data.enlacesPendientes || []);
+      setTitulosGrabados(data.titulosGrabados || []);
     } catch (error) {
       console.error('Error cargando datos:', error);
       mostrarToast('Error cargando datos');
@@ -170,6 +181,11 @@ export default function BibliotecaPage() {
     }
   };
 
+  // ========================================================================
+  // PROMPT-BUSQUEDA-LIBROS: Función para copiar el prompt de búsqueda de libros
+  // Para modificar el prompt, busca: "PROMPT-BUSQUEDA-LIBROS" o "copiarPrompt"
+  // Ubicación: app/page.tsx línea ~184
+  // ========================================================================
   const copiarPrompt = () => {
     const prompt = `================================================================================
 PROMPT: BUSCADOR DE LIBROS POR ISBN O ENLACE DIRECTO
@@ -364,8 +380,17 @@ Una vez que hayas buscado TODOS los ISBNs:
 
 PASO 5: Generar JSON para importar
 --------------------------------------------------------------------------------
-Después de mostrar la tabla completa, AUTOMÁTICAMENTE genera un JSON con TODOS
-los libros encontrados en el siguiente formato:
+Después de mostrar la tabla completa, AUTOMÁTICAMENTE genera un archivo JSON
+con TODOS los libros encontrados.
+
+⚠️ IMPORTANTE - CREAR ARCHIVO JSON:
+✅ SIEMPRE crea un archivo JSON en la carpeta de descargas del usuario
+✅ Nombre del archivo: "libros_importar.json"
+✅ Ubicación: C:\\Users\\adria\\Downloads\\libros_importar.json
+✅ Usa la herramienta Write para crear el archivo
+✅ NO muestres el JSON en un bloque de código, créalo directamente como archivo
+
+Formato del JSON:
 
 [
   {
@@ -398,12 +423,13 @@ IMPORTANTE sobre el JSON:
 - Si un campo está vacío, déjalo como string vacío ""
 
 Instrucciones para el usuario:
-1. Copia el JSON completo (desde [ hasta ])
-2. Ve a la aplicación en http://localhost:7000
-3. Haz clic en el botón 📥 "Importar Libros desde JSON" (segundo botón flotante desde abajo)
-4. Pega el JSON en el textarea
-5. Haz clic en "🔍 Validar JSON" para verificar que esté correcto
-6. Haz clic en "✅ Importar X Libros" para agregarlos a la biblioteca
+1. Abre el archivo "libros_importar.json" de tu carpeta de descargas
+2. Copia TODO el contenido del archivo (Ctrl+A, Ctrl+C)
+3. Ve a la aplicación en http://localhost:7000
+4. Haz clic en el botón 📥 "Importar Libros desde JSON" (segundo botón flotante desde abajo)
+5. Pega el JSON en el textarea
+6. Haz clic en "🔍 Validar JSON" para verificar que esté correcto
+7. Haz clic en "✅ Importar X Libros" para agregarlos a la biblioteca
 
 La app detectará automáticamente libros duplicados y solo agregará los nuevos.
 
@@ -461,30 +487,8 @@ Tú haces:
 1. Creas TodoWrite con 2 tareas
 2. Usas WebFetch directamente en cada URL (100% confiable)
 3. Compilas UNA SOLA TABLA con los 2 libros
-4. AUTOMÁTICAMENTE generas el JSON en un bloque de código:
-
-[
-  {
-    "titulo": "Las ratitas 14",
-    "sinopsis": "...",
-    "tituloCompleto": "Las ratitas 14",
-    "autor": "...",
-    "idioma": "Español",
-    "editorial": "...",
-    "tapa": "Blanda",
-    "año": "2024",
-    "paginas": "...",
-    "genero": "Infantil",
-    "isbn": "9788408306122",
-    "precio": "$..."
-  },
-  {
-    "titulo": "La chica oculta",
-    ...
-  }
-]
-
-5. Das instrucciones al usuario para copiar el JSON e importarlo en la app
+4. AUTOMÁTICAMENTE creas el archivo JSON en C:\\Users\\adria\\Downloads\\libros_importar.json
+5. Das instrucciones al usuario para abrir el archivo y copiar el contenido para importarlo en la app
 
 
 EJEMPLO 2 - Con ISBNs:
@@ -500,8 +504,8 @@ Tú haces:
 3. Usas WebFetch para obtener detalles de cada libro encontrado
 4. Compilas UNA SOLA TABLA con los libros encontrados
 5. Si algún ISBN no se encuentra, lo mencionas
-6. AUTOMÁTICAMENTE generas el JSON con los libros encontrados
-7. Das instrucciones al usuario para copiar el JSON e importarlo en la app
+6. AUTOMÁTICAMENTE creas el archivo JSON en C:\\Users\\adria\\Downloads\\libros_importar.json
+7. Das instrucciones al usuario para abrir el archivo y copiar el contenido para importarlo en la app
 
 
 EJEMPLO 3 - Mezcla de ambos:
@@ -516,8 +520,8 @@ Tú haces:
 2. Usas WebFetch para el enlace directo
 3. Usas WebSearch + WebFetch para los 2 ISBNs
 4. Compilas UNA SOLA TABLA con todos los libros
-5. AUTOMÁTICAMENTE generas el JSON
-6. Das instrucciones para importar
+5. AUTOMÁTICAMENTE creas el archivo JSON en C:\\Users\\adria\\Downloads\\libros_importar.json
+6. Das instrucciones al usuario para abrir el archivo y copiar el contenido para importarlo en la app
 
 
 ERRORES COMUNES A EVITAR
@@ -528,7 +532,8 @@ ERRORES COMUNES A EVITAR
 ❌ NO uses "Tapa blanda" o "Pasta dura", usa "Blanda" o "Dura"
 ❌ NO olvides usar TodoWrite para tracking
 ❌ NO dejes campos con "N/A", déjalos vacíos
-❌ NO olvides generar el JSON automáticamente
+❌ NO olvides crear el archivo JSON automáticamente en C:\\Users\\adria\\Downloads\\libros_importar.json
+❌ NO muestres el JSON en un bloque de código, créalo como archivo
 ❌ NO uses comillas simples en el JSON, usa comillas dobles
 ❌ NO olvides mencionar ISBNs no encontrados
 
@@ -545,9 +550,9 @@ Antes de entregar resultados, verifica:
 ✅ Solo "Español", "Inglés" o "Francés" para idioma (NUNCA "Castellano")
 ✅ TodoWrite actualizado con progreso
 ✅ Campos vacíos como string vacío "" si no hay información
-✅ JSON generado AUTOMÁTICAMENTE después de la tabla
+✅ Archivo JSON creado AUTOMÁTICAMENTE en C:\\Users\\adria\\Downloads\\libros_importar.json
 ✅ JSON válido (usa comillas dobles, sintaxis correcta)
-✅ Instrucciones claras para el usuario sobre cómo importar
+✅ Instrucciones claras para el usuario sobre cómo abrir el archivo e importar
 ✅ ISBNs no encontrados mencionados claramente
 ✅ Si es Casa del Libro, precio con 5% de descuento aplicado
 
@@ -599,6 +604,58 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
       body: JSON.stringify({ enlacesPendientes: nuevosEnlaces }),
     });
     mostrarToast('ISBN eliminado');
+  };
+
+  const agregarTitulo = async (titulo: string) => {
+    if (!titulo.trim()) return;
+
+    const nuevosTitulos = [...titulosGrabados, titulo.trim()];
+    setTitulosGrabados(nuevosTitulos);
+    await fetch('/api/libros', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulosGrabados: nuevosTitulos }),
+    });
+    mostrarToast('Título agregado');
+  };
+
+  const eliminarTitulo = async (index: number) => {
+    const nuevosTitulos = titulosGrabados.filter((_, i) => i !== index);
+    setTitulosGrabados(nuevosTitulos);
+    await fetch('/api/libros', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulosGrabados: nuevosTitulos }),
+    });
+    mostrarToast('Título eliminado');
+  };
+
+  const limpiarTitulos = async () => {
+    if (titulosGrabados.length === 0) {
+      mostrarToast('No hay títulos para limpiar');
+      return;
+    }
+
+    if (confirm(`¿Estás seguro de que quieres eliminar todos los ${titulosGrabados.length} títulos grabados?`)) {
+      setTitulosGrabados([]);
+      await fetch('/api/libros', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulosGrabados: [] }),
+      });
+      mostrarToast('Títulos limpiados');
+    }
+  };
+
+  const copiarTitulos = () => {
+    if (titulosGrabados.length === 0) {
+      mostrarToast('No hay títulos para copiar');
+      return;
+    }
+
+    navigator.clipboard.writeText(titulosGrabados.join('\n')).then(() => {
+      mostrarToast(`📋 ${titulosGrabados.length} títulos copiados al portapapeles`);
+    });
   };
 
 
@@ -852,13 +909,26 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
       <button className="home-button" onClick={() => {
         setSearchPanelOpen(false);
         setImportPanelOpen(false);
+        setTitulosPanelOpen(false);
       }} title="Volver a Biblioteca Principal">
         🏠
+      </button>
+
+      <button className="titulos-toggle-btn" onClick={() => {
+        setTitulosPanelOpen(!titulosPanelOpen);
+        setSearchPanelOpen(false);
+        setImportPanelOpen(false);
+      }} title="Títulos Grabados">
+        📝
+        {titulosGrabados.length > 0 && (
+          <span className="badge">{titulosGrabados.length}</span>
+        )}
       </button>
 
       <button className="search-toggle-btn" onClick={() => {
         setSearchPanelOpen(!searchPanelOpen);
         setImportPanelOpen(false);
+        setTitulosPanelOpen(false);
       }} title="Lista de Búsqueda">
         🔍
         {enlacesPendientes.length > 0 && (
@@ -873,8 +943,15 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
       <button className="import-toggle-btn" onClick={() => {
         setImportPanelOpen(!importPanelOpen);
         setSearchPanelOpen(false);
+        setTitulosPanelOpen(false);
       }} title="Importar Libros desde JSON">
         📥
+      </button>
+
+      <button className="mercadolibre-button" onClick={() => {
+        window.open('https://claude.ai/chat/32c40fd5-b0b3-45e0-8f34-3e9d1d22890d', '_blank');
+      }} title="Títulos para Mercadolibre">
+        🏷️
       </button>
 
       {/* Vista de pantalla completa de Lista de Búsqueda */}
@@ -1240,6 +1317,136 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
               <li>Cada libro necesita al menos el campo <code>"isbn"</code></li>
               <li>Los duplicados se detectan automáticamente y se omiten</li>
               <li>Puedes importar tantos libros como quieras de una sola vez</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Vista de pantalla completa de Títulos Grabados */}
+      <div className={`titulos-panel-overlay ${titulosPanelOpen ? 'active' : ''}`}></div>
+      <div className={`titulos-panel ${titulosPanelOpen ? 'active' : ''}`}>
+        <div className="titulos-panel-header">
+          <div className="titulos-panel-title">
+            📝 Títulos Grabados
+          </div>
+          <button className="titulos-panel-close" onClick={() => setTitulosPanelOpen(false)}>
+            ✕
+          </button>
+        </div>
+
+        <div className="titulos-panel-body">
+          <div className="titulos-counter">
+            {titulosGrabados.length} {titulosGrabados.length === 1 ? 'título grabado' : 'títulos grabados'}
+          </div>
+
+          <div className="titulos-input-container">
+            <textarea
+              id="titulosInput"
+              className="titulos-input"
+              placeholder="Escribe un título de libro y presiona Enter..."
+              rows={3}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  const textarea = e.target as HTMLTextAreaElement;
+                  const titulo = textarea.value.trim();
+                  if (titulo) {
+                    agregarTitulo(titulo);
+                    textarea.value = '';
+                  }
+                }
+              }}
+              onPaste={(e) => {
+                // Detectar si se pegan múltiples líneas
+                const pastedText = e.clipboardData.getData('text');
+                const lines = pastedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+                if (lines.length > 1) {
+                  e.preventDefault();
+                  // Agregar todos los títulos automáticamente
+                  const nuevosTitulos = [...titulosGrabados, ...lines];
+                  setTitulosGrabados(nuevosTitulos);
+
+                  // Guardar en API
+                  fetch('/api/libros', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulosGrabados: nuevosTitulos }),
+                  });
+
+                  mostrarToast(`✅ ${lines.length} títulos agregados`);
+                  (e.target as HTMLTextAreaElement).value = '';
+                }
+              }}
+            />
+          </div>
+
+          <div className="titulos-controls">
+            <button onClick={copiarTitulos} className="btn-success">
+              📋 Copiar Títulos
+            </button>
+            <button onClick={limpiarTitulos} className="btn-danger">
+              🗑️ Limpiar Todo
+            </button>
+          </div>
+
+          <div className="titulos-table-container">
+            <table className="titulos-table">
+              <thead>
+                <tr>
+                  <th style={{width: '60px', minWidth: '60px', textAlign: 'center'}}>#</th>
+                  <th style={{width: 'auto'}}>Título del Libro</th>
+                  <th style={{width: '120px', minWidth: '120px', textAlign: 'center'}}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {titulosGrabados.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="titulos-empty">
+                      <div className="empty-state-icon">📝</div>
+                      <p style={{fontSize: '1.2em', marginBottom: '10px'}}>No hay títulos grabados</p>
+                      <p>Agrega títulos de libros que quieras comprar</p>
+                    </td>
+                  </tr>
+                ) : (
+                  titulosGrabados.map((titulo, index) => (
+                    <tr key={index}>
+                      <td style={{textAlign: 'center', fontWeight: 'bold', color: '#666'}}>
+                        {index + 1}
+                      </td>
+                      <td>
+                        <span className="titulo-text" onClick={() => {
+                          navigator.clipboard.writeText(titulo);
+                          mostrarToast(`Título copiado: ${titulo}`);
+                        }} title="Clic para copiar título">{titulo}</span>
+                      </td>
+                      <td style={{textAlign: 'center'}}>
+                        <button className="titulos-delete-btn" onClick={() => eliminarTitulo(index)} title="Eliminar este título">
+                          🗑️ Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{
+            marginTop: '30px',
+            padding: '20px',
+            background: '#fff9e6',
+            border: '2px solid #ffeb3b',
+            borderRadius: '12px'
+          }}>
+            <h4 style={{marginTop: 0, color: '#f57f17', display: 'flex', alignItems: 'center', gap: '10px'}}>
+              💡 Consejos
+            </h4>
+            <ul style={{margin: '10px 0', paddingLeft: '20px', color: '#795548', lineHeight: '1.8'}}>
+              <li>Escribe un título y presiona <strong>Enter</strong> para agregarlo</li>
+              <li>Pega múltiples títulos (uno por línea) para agregarlos todos a la vez</li>
+              <li>Haz clic en un título para copiarlo al portapapeles</li>
+              <li>Usa esta lista para recordar qué libros necesitas comprar</li>
             </ul>
           </div>
         </div>

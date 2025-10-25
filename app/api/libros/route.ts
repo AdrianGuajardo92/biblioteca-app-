@@ -27,6 +27,7 @@ interface BibliotecaData {
   isbnsNoEncontrados: string[];
   enlacesPendientes: string[];
   enlacesGuardados: Enlace[];
+  titulosGrabados: string[];
 }
 
 // Inicializar cliente Redis de Upstash
@@ -46,6 +47,7 @@ const defaultData: BibliotecaData = {
   isbnsNoEncontrados: [],
   enlacesPendientes: [],
   enlacesGuardados: [],
+  titulosGrabados: [],
 };
 
 // Usar memoria local si Redis no está disponible (desarrollo local)
@@ -102,6 +104,7 @@ export async function POST(request: NextRequest) {
       isbnsNoEncontrados: body.isbnsNoEncontrados !== undefined ? body.isbnsNoEncontrados : currentData.isbnsNoEncontrados,
       enlacesPendientes: body.enlacesPendientes !== undefined ? body.enlacesPendientes : currentData.enlacesPendientes,
       enlacesGuardados: body.enlacesGuardados !== undefined ? body.enlacesGuardados : currentData.enlacesGuardados,
+      titulosGrabados: body.titulosGrabados !== undefined ? body.titulosGrabados : currentData.titulosGrabados || [],
     };
 
     await saveData(updatedData);
