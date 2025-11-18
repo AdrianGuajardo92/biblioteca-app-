@@ -5,7 +5,8 @@
       "Bash(npm run dev:*)",
       "WebFetch(domain:latam.casadellibro.com)",
       "WebSearch",
-      "WebFetch(domain:www.casadellibro.com)"
+      "WebFetch(domain:www.casadellibro.com)",
+      "WebFetch(domain:www.arnoia.com)"
     ],
     "deny": [],
     "ask": []

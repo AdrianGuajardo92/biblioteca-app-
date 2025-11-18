@@ -59,6 +59,7 @@ export default function BibliotecaPage() {
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   const [importPanelOpen, setImportPanelOpen] = useState(false);
   const [titulosPanelOpen, setTitulosPanelOpen] = useState(false);
+  const [filtroTienda, setFiltroTienda] = useState<'todos' | 'casadellibro' | 'amazon' | 'elsotano' | 'arnoia'>('todos');
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
@@ -138,8 +139,6 @@ export default function BibliotecaPage() {
       return;
     }
 
-    const headers = ['Título', 'Sinopsis', 'Título del libro', 'Autor', 'Idioma', 'Editorial del libro', 'Tapa del libro', 'Año de publicación', 'Cantidad de páginas', 'Género del libro', 'ISBN', 'Precio'];
-
     const rows = libros.map(libro => [
       libro.titulo || '',
       libro.sinopsis || '',
@@ -155,7 +154,7 @@ export default function BibliotecaPage() {
       limpiarPrecio(libro.precio || '')
     ]);
 
-    const tsvContent = [headers, ...rows]
+    const tsvContent = rows
       .map(row => row.join('\t'))
       .join('\n');
 
@@ -971,6 +970,101 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
             {enlacesPendientes.length} {enlacesPendientes.length === 1 ? 'enlace guardado' : 'enlaces guardados'}
           </div>
 
+          {/* Botones de filtro por tienda */}
+          <div className="filter-buttons-container" style={{
+            display: 'flex',
+            gap: '10px',
+            marginBottom: '15px',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}>
+            <button
+              onClick={() => setFiltroTienda('todos')}
+              className={filtroTienda === 'todos' ? 'filter-btn active' : 'filter-btn'}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: filtroTienda === 'todos' ? '2px solid #4CAF50' : '2px solid #ddd',
+                background: filtroTienda === 'todos' ? '#4CAF50' : 'white',
+                color: filtroTienda === 'todos' ? 'white' : '#333',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Todos ({enlacesPendientes.length})
+            </button>
+            <button
+              onClick={() => setFiltroTienda('casadellibro')}
+              className={filtroTienda === 'casadellibro' ? 'filter-btn active' : 'filter-btn'}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: filtroTienda === 'casadellibro' ? '2px solid #4CAF50' : '2px solid #ddd',
+                background: filtroTienda === 'casadellibro' ? '#4CAF50' : 'white',
+                color: filtroTienda === 'casadellibro' ? 'white' : '#333',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              🔗 Casa del Libro ({enlacesPendientes.filter(e => e.includes('latam.casadellibro.com') || e.includes('casadellibro.com')).length})
+            </button>
+            <button
+              onClick={() => setFiltroTienda('amazon')}
+              className={filtroTienda === 'amazon' ? 'filter-btn active' : 'filter-btn'}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: filtroTienda === 'amazon' ? '2px solid #4CAF50' : '2px solid #ddd',
+                background: filtroTienda === 'amazon' ? '#4CAF50' : 'white',
+                color: filtroTienda === 'amazon' ? 'white' : '#333',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              🛒 Amazon ({enlacesPendientes.filter(e => /amazon\.(com|es|com\.mx|co\.uk|ca|de|fr|it|co\.jp|in|com\.br|com\.au|cn|nl|sg)/.test(e)).length})
+            </button>
+            <button
+              onClick={() => setFiltroTienda('elsotano')}
+              className={filtroTienda === 'elsotano' ? 'filter-btn active' : 'filter-btn'}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: filtroTienda === 'elsotano' ? '2px solid #4CAF50' : '2px solid #ddd',
+                background: filtroTienda === 'elsotano' ? '#4CAF50' : 'white',
+                color: filtroTienda === 'elsotano' ? 'white' : '#333',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              📖 El Sótano ({enlacesPendientes.filter(e => e.includes('servicioalpiedelaletra.com') || e.includes('sotano_business')).length})
+            </button>
+            <button
+              onClick={() => setFiltroTienda('arnoia')}
+              className={filtroTienda === 'arnoia' ? 'filter-btn active' : 'filter-btn'}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: filtroTienda === 'arnoia' ? '2px solid #4CAF50' : '2px solid #ddd',
+                background: filtroTienda === 'arnoia' ? '#4CAF50' : 'white',
+                color: filtroTienda === 'arnoia' ? 'white' : '#333',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              📚 ARNOIA ({enlacesPendientes.filter(e => e.includes('arnoia.com') || e.includes('arnoia')).length})
+            </button>
+          </div>
+
           <div className="search-input-container">
             <textarea
               id="searchInput"
@@ -1027,15 +1121,38 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
 
           <div className="search-controls">
             <button onClick={() => {
-              if (enlacesPendientes.length === 0) {
-                mostrarToast('No hay enlaces para copiar');
+              // Filtrar enlaces según la tienda seleccionada
+              const enlacesFiltrados = enlacesPendientes.filter(enlace => {
+                if (filtroTienda === 'todos') return true;
+                if (filtroTienda === 'casadellibro') {
+                  return enlace.includes('latam.casadellibro.com') || enlace.includes('casadellibro.com');
+                }
+                if (filtroTienda === 'amazon') {
+                  return /amazon\.(com|es|com\.mx|co\.uk|ca|de|fr|it|co\.jp|in|com\.br|com\.au|cn|nl|sg)/.test(enlace);
+                }
+                if (filtroTienda === 'elsotano') {
+                  return enlace.includes('servicioalpiedelaletra.com') || enlace.includes('sotano_business');
+                }
+                if (filtroTienda === 'arnoia') {
+                  return enlace.includes('arnoia.com') || enlace.includes('arnoia');
+                }
+                return false;
+              });
+
+              if (enlacesFiltrados.length === 0) {
+                mostrarToast('No hay enlaces para copiar con el filtro actual');
                 return;
               }
-              navigator.clipboard.writeText(enlacesPendientes.join('\n')).then(() => {
-                mostrarToast(`📋 ${enlacesPendientes.length} enlaces copiados al portapapeles`);
+
+              navigator.clipboard.writeText(enlacesFiltrados.join('\n')).then(() => {
+                const tiendaNombre = filtroTienda === 'todos' ? 'todos' :
+                                    filtroTienda === 'casadellibro' ? 'Casa del Libro' :
+                                    filtroTienda === 'amazon' ? 'Amazon' :
+                                    filtroTienda === 'elsotano' ? 'El Sótano' : 'ARNOIA';
+                mostrarToast(`📋 ${enlacesFiltrados.length} enlaces de ${tiendaNombre} copiados`);
               });
             }} className="btn-success">
-              📋 Copiar Enlaces
+              📋 Copiar Enlaces {filtroTienda !== 'todos' ? `(${filtroTienda === 'casadellibro' ? 'Casa del Libro' : filtroTienda === 'amazon' ? 'Amazon' : filtroTienda === 'elsotano' ? 'El Sótano' : 'ARNOIA'})` : ''}
             </button>
             {enlacesPendientes.some(enlace => enlace.includes('latam.casadellibro.com/?query=')) && (
               <button onClick={() => {
@@ -1062,9 +1179,26 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
                 mostrarToast('No hay enlaces para limpiar');
                 return;
               }
-              if (confirm(`¿Estás seguro de que quieres eliminar todos los ${enlacesPendientes.length} enlaces de la lista?`)) {
+
+              // Mensaje de confirmación específico según el filtro activo
+              let mensajeConfirmacion = '';
+              if (filtroTienda === 'todos') {
+                mensajeConfirmacion = `⚠️ ATENCIÓN: Estás a punto de eliminar TODOS los ${enlacesPendientes.length} enlaces de la lista.\n\n¿Estás seguro de continuar?\n\nEsta acción no se puede deshacer.`;
+              } else {
+                const tiendaNombre = filtroTienda === 'casadellibro' ? 'Casa del Libro' :
+                                    filtroTienda === 'amazon' ? 'Amazon' :
+                                    filtroTienda === 'elsotano' ? 'El Sótano' : 'ARNOIA';
+                mensajeConfirmacion = `⚠️ ATENCIÓN: Tienes el filtro "${tiendaNombre}" activo.\n\nEste botón eliminará TODOS los ${enlacesPendientes.length} enlaces de la lista (no solo los de ${tiendaNombre}).\n\n¿Estás seguro de continuar?\n\nEsta acción no se puede deshacer.`;
+              }
+
+              if (confirm(mensajeConfirmacion)) {
                 setEnlacesPendientes([]);
-                mostrarToast('🗑️ Lista de búsqueda limpiada');
+                fetch('/api/libros', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ enlacesPendientes: [] }),
+                });
+                mostrarToast('🗑️ Lista de búsqueda completamente limpiada');
               }
             }} className="btn-danger">
               🗑️ Limpiar Todo
@@ -1072,26 +1206,48 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
           </div>
 
           <div className="search-table-container">
-            <table className="search-table">
-              <thead>
-                <tr>
-                  <th style={{width: '140px', minWidth: '140px'}}>ISBN</th>
-                  <th style={{width: '25%'}}>Título</th>
-                  <th style={{width: 'auto'}}>Nombre del Ejemplar</th>
-                  <th style={{width: '120px', minWidth: '120px', textAlign: 'center'}}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {enlacesPendientes.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="search-empty">
-                      <div className="empty-state-icon">📭</div>
-                      <p style={{fontSize: '1.2em', marginBottom: '10px'}}>No hay enlaces guardados</p>
-                      <p>Agrega enlaces o ISBNs para buscar después</p>
-                    </td>
-                  </tr>
-                ) : (
-                  enlacesPendientes.map((enlace, index) => {
+            {(() => {
+              // Filtrar enlaces según la tienda seleccionada
+              const enlacesFiltrados = enlacesPendientes.filter(enlace => {
+                if (filtroTienda === 'todos') return true;
+                if (filtroTienda === 'casadellibro') {
+                  return enlace.includes('latam.casadellibro.com') || enlace.includes('casadellibro.com');
+                }
+                if (filtroTienda === 'amazon') {
+                  return /amazon\.(com|es|com\.mx|co\.uk|ca|de|fr|it|co\.jp|in|com\.br|com\.au|cn|nl|sg)/.test(enlace);
+                }
+                if (filtroTienda === 'elsotano') {
+                  return enlace.includes('servicioalpiedelaletra.com') || enlace.includes('sotano_business');
+                }
+                if (filtroTienda === 'arnoia') {
+                  return enlace.includes('arnoia.com') || enlace.includes('arnoia');
+                }
+                return false;
+              });
+
+              return (
+                <table className="search-table">
+                  <thead>
+                    <tr>
+                      <th style={{width: '140px', minWidth: '140px'}}>ISBN</th>
+                      <th style={{width: '25%'}}>Título</th>
+                      <th style={{width: 'auto'}}>Nombre del Ejemplar</th>
+                      <th style={{width: '120px', minWidth: '120px', textAlign: 'center'}}>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enlacesFiltrados.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="search-empty">
+                          <div className="empty-state-icon">📭</div>
+                          <p style={{fontSize: '1.2em', marginBottom: '10px'}}>
+                            {enlacesPendientes.length === 0 ? 'No hay enlaces guardados' : 'No hay enlaces de esta tienda'}
+                          </p>
+                          <p>{enlacesPendientes.length === 0 ? 'Agrega enlaces o ISBNs para buscar después' : 'Selecciona otro filtro o agrega enlaces de esta tienda'}</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      enlacesFiltrados.map((enlace, index) => {
                     // Extraer el ISBN del enlace si es de Casa del Libro
                     // Formato 1: https://latam.casadellibro.com/?query=9788467961249
                     // Formato 2: https://latam.casadellibro.com/libro-kowloon-generic-romance-5/9788467961249/13613556
@@ -1103,6 +1259,35 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
                       isbn = queryMatch[1];
                     } else if (pathMatch) {
                       isbn = pathMatch[1];
+                    }
+
+                    // Detectar enlaces de Amazon de forma inteligente
+                    // Soporta: amazon.com, amazon.es, amazon.com.mx, amazon.co.uk, etc.
+                    const esEnlaceAmazon = /amazon\.(com|es|com\.mx|co\.uk|ca|de|fr|it|co\.jp|in|com\.br|com\.au|cn|nl|sg)/.test(enlace);
+
+                    // Detectar enlaces de El Sótano
+                    // Formato: https://servicioalpiedelaletra.com/sotano_business/libro-nombre-pd-12345
+                    const esEnlaceElSotano = enlace.includes('servicioalpiedelaletra.com') || enlace.includes('sotano_business');
+
+                    // Detectar enlaces de ARNOIA
+                    const esEnlaceArnoia = enlace.includes('arnoia.com') || enlace.includes('arnoia');
+
+                    // Extraer ISBN de enlaces de Amazon
+                    // Formato Amazon: /dp/ISBN/ o /product/ISBN/
+                    if (esEnlaceAmazon && !isbn) {
+                      const amazonIsbnMatch = enlace.match(/\/(?:dp|product)\/([A-Z0-9]{10}|[0-9]{13})\//i);
+                      if (amazonIsbnMatch) {
+                        isbn = amazonIsbnMatch[1];
+                      }
+                    }
+
+                    // Extraer ID de producto de El Sótano
+                    // Formato: libro-nombre-pd-12345
+                    if (esEnlaceElSotano && !isbn) {
+                      const sotanoIdMatch = enlace.match(/pd-(\d+)/);
+                      if (sotanoIdMatch) {
+                        isbn = sotanoIdMatch[1];
+                      }
                     }
 
                     const esEnlaceCasaDelLibro = enlace.includes('latam.casadellibro.com') || enlace.includes('casadellibro.com');
@@ -1121,7 +1306,7 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
                         </td>
                         <td>
                           <a href={enlace} target="_blank" rel="noopener noreferrer" className="search-link" onClick={(e) => e.stopPropagation()}>
-                            {esEnlaceCasaDelLibro ? '🔗 Casa del Libro' : '🔗 Enlace externo'}
+                            {esEnlaceAmazon ? '🛒 Amazon' : (esEnlaceElSotano ? '📖 El Sótano' : (esEnlaceArnoia ? '📚 ARNOIA' : (esEnlaceCasaDelLibro ? '🔗 Casa del Libro' : '🔗 Enlace externo')))}
                           </a>
                         </td>
                         <td>
@@ -1137,9 +1322,11 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
                       </tr>
                     );
                   })
-                )}
-              </tbody>
-            </table>
+                    )}
+                  </tbody>
+                </table>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -1335,10 +1522,6 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
         </div>
 
         <div className="titulos-panel-body">
-          <div className="titulos-counter">
-            {titulosGrabados.length} {titulosGrabados.length === 1 ? 'título grabado' : 'títulos grabados'}
-          </div>
-
           <div className="titulos-input-container">
             <textarea
               id="titulosInput"
@@ -1394,7 +1577,6 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
             <table className="titulos-table">
               <thead>
                 <tr>
-                  <th style={{width: '60px', minWidth: '60px', textAlign: 'center'}}>#</th>
                   <th style={{width: 'auto'}}>Título del Libro</th>
                   <th style={{width: '120px', minWidth: '120px', textAlign: 'center'}}>Acciones</th>
                 </tr>
@@ -1402,7 +1584,7 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
               <tbody>
                 {titulosGrabados.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="titulos-empty">
+                    <td colSpan={2} className="titulos-empty">
                       <div className="empty-state-icon">📝</div>
                       <p style={{fontSize: '1.2em', marginBottom: '10px'}}>No hay títulos grabados</p>
                       <p>Agrega títulos de libros que quieras comprar</p>
@@ -1411,9 +1593,6 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
                 ) : (
                   titulosGrabados.map((titulo, index) => (
                     <tr key={index}>
-                      <td style={{textAlign: 'center', fontWeight: 'bold', color: '#666'}}>
-                        {index + 1}
-                      </td>
                       <td>
                         <span className="titulo-text" onClick={() => {
                           navigator.clipboard.writeText(titulo);
@@ -1430,24 +1609,6 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
                 )}
               </tbody>
             </table>
-          </div>
-
-          <div style={{
-            marginTop: '30px',
-            padding: '20px',
-            background: '#fff9e6',
-            border: '2px solid #ffeb3b',
-            borderRadius: '12px'
-          }}>
-            <h4 style={{marginTop: 0, color: '#f57f17', display: 'flex', alignItems: 'center', gap: '10px'}}>
-              💡 Consejos
-            </h4>
-            <ul style={{margin: '10px 0', paddingLeft: '20px', color: '#795548', lineHeight: '1.8'}}>
-              <li>Escribe un título y presiona <strong>Enter</strong> para agregarlo</li>
-              <li>Pega múltiples títulos (uno por línea) para agregarlos todos a la vez</li>
-              <li>Haz clic en un título para copiarlo al portapapeles</li>
-              <li>Usa esta lista para recordar qué libros necesitas comprar</li>
-            </ul>
           </div>
         </div>
       </div>
