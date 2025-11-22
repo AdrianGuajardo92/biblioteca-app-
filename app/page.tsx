@@ -857,6 +857,7 @@ Después te preguntaré cuáles quieres agregar a tu biblioteca.`;
         }}
         titulosCount={titulosGrabados.length}
         searchCount={enlacesPendientes.length}
+        librosCount={libros.length}
         activePanel={
           searchPanelOpen ? 'search' :
           importPanelOpen ? 'import' :

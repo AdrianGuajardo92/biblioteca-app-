@@ -6,7 +6,10 @@
       "WebFetch(domain:latam.casadellibro.com)",
       "WebSearch",
       "WebFetch(domain:www.casadellibro.com)",
-      "WebFetch(domain:www.arnoia.com)"
+      "WebFetch(domain:www.arnoia.com)",
+      "Bash(node agregar-libros.js:*)",
+      "Bash(timeout /t 10)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

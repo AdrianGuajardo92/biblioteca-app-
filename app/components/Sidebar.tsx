@@ -12,6 +12,7 @@ interface SidebarProps {
   onMercadolibreClick: () => void;
   titulosCount: number;
   searchCount: number;
+  librosCount: number;
   activePanel: 'home' | 'titulos' | 'search' | 'import' | null;
 }
 
@@ -24,6 +25,7 @@ export default function Sidebar({
   onMercadolibreClick,
   titulosCount,
   searchCount,
+  librosCount,
   activePanel,
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -59,6 +61,9 @@ export default function Sidebar({
         >
           <span className={styles.sidebarItemIcon}>🏠</span>
           {!isCollapsed && <span className={styles.sidebarItemText}>Inicio</span>}
+          {librosCount > 0 && (
+            <span className={styles.sidebarBadge}>{librosCount}</span>
+          )}
         </button>
 
         <button

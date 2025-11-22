@@ -118,6 +118,28 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
 }
 
+.table-header-info {
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #f5f1ea 0%, #e8dfd4 100%);
+    border-bottom: 2px solid #d4c5b9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: white;
+    border-radius: 20px;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #2c2416;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
